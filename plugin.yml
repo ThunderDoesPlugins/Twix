@@ -1,0 +1,21 @@
+name: Twix
+version: 0.1.0-PILOT1
+api: [3.0.0-ALPHA5]
+author: Thunder33345
+description: "Tweet from the comfort of your server!"
+website: ""
+main: Thunder33345\Twix\Twix
+
+commands:
+  twix:
+    aliases: ['tw']
+
+permissions:
+  twix:
+    default: false
+    description: ""
+    children:
+      twix.use:
+        default: op
+      twix.update:
+        default: op

@@ -1,0 +1,23 @@
+---
+# Config of Twix
+# This plugin requires API tokens to function, if you do not have one, please register it at https://apps.twitter.com
+# (You MAY be prompted to verify your phone number)
+
+# Please note that this plugin need token that have Access Level of Read Write to work
+
+# Consumer Secret, this is the API token
+consumer-key: ""
+consumer-secret: ""
+# User tokens for that secret, this is the user token for that API token
+# This also determines which account this the post will be sent from
+oauth-token: ""
+oauth-secret: ""
+
+# Update notifier settings
+# This is a beta feature, if it's causing any issues try turning this off
+updater:
+  # do you want to enable this component?
+  enable: true
+  # which branch to use? (leave as * if you dont know what you are doing)
+  branch: "*"
+...
