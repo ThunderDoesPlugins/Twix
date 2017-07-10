@@ -7,9 +7,10 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
-use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
-use pocketmine\scheduler\AsyncTask;
+use Thunder33345\Twix\Commands\TwixGetCommand;
+use Thunder33345\Twix\Commands\TwixPostCommand;
+use Thunder33345\Twix\Commands\TwixVerifyCommand;
 use Thunder33345\Twix\Updater\UpdateChecker;
 
 class Twix extends PluginBase implements Listener
@@ -29,13 +30,18 @@ class Twix extends PluginBase implements Listener
    */
   const REQUEST_GET = 'get';
   const REQUEST_POST = 'post';
-  const ENDPOINT_UPDATE = 'https://api.twitter.com/1.1/statuses/update.json';
+
   private $tokens = [];
   /**
    * @var UpdateChecker $updateChecker
    */
   private $updateChecker;
   private $hasUpdate = false;
+
+  /**
+   * @var TwixHelper $twixHelper
+   */
+  private $twixHelper;
 
   public function onLoad()
   {
@@ -57,8 +63,14 @@ class Twix extends PluginBase implements Listener
     }
     $this->getServer()->getPluginManager()->registerEvents($this,$this);
     $this->reloadTokens();
+
     $this->updateChecker = new UpdateChecker($this,$this->getConfig());
-    //$this->getServer()->getUpdater()->getUpdateInfo();
+
+    $this->twixHelper = new TwixHelper($this);
+
+    $this->getServer()->getCommandMap()->register('twixpost',new TwixPostCommand($this));
+    $this->getServer()->getCommandMap()->register('twixverify',new TwixVerifyCommand($this));
+    $this->getServer()->getCommandMap()->register('twixget',new TwixGetCommand($this));
   }
 
   public function onDisable()
@@ -68,32 +80,18 @@ class Twix extends PluginBase implements Listener
 
   public function onCommand(CommandSender $sender,Command $command,$label,array $args)
   {
-    if(!$sender->hasPermission('twix.use')) {
-      $sender->sendMessage('Insufficient Permissions');
-      return;
+    //todo redirect twix to sub commands
+    if($label == 'twix'){
+      $helps = [
+       'Commands:',
+       '/Command (args) (shortcut)',
+       '/TwixGet <User> (twg)',
+       '/TwixPost <message> (twp)',
+       '/TwixVerify (twv)',
+      ];
+      foreach($helps as $help)
+      $sender->sendMessage($help);
     }
-    if(!isset($args[0])) {
-      $sender->sendMessage('please include msg');
-      return;
-    }
-    $string = implode(" ",$args);
-    $sender->sendMessage("Trying to post '$string'");
-    $function = function(TwixResult $result) {
-      $id = $result->getId();
-      $sender = $id['sender'];
-      $msg = $id['msg'];
-      if($result->getHttpRespond() !== 200) {
-        $result->getServer()->getLogger()->info('Tweet: "'.$sender.'" Post ('.$msg.') Has Fail To Sent');
-        $player = $result->getServer()->getPlayer($sender);
-        if($player instanceof Player) $player->sendMessage('Your Post Has Fail To Sent');
-        $result->getServer()->getLogger()->info('Tweet Failed To Sent HTTP Code: '.$result->getHttpRespond().' Respond: '.$result->getRespond());
-        return;
-      }
-      $result->getServer()->getLogger()->info('Tweet: "'.$sender.'" Posted "'.$msg.'" to twitter!');
-      $player = $result->getServer()->getPlayer($sender);
-      if($player instanceof Player) $player->sendMessage('Your Post "'.$msg.'" Has Been Sent');
-    };
-    $this->sendPost($string,$function,[],['sender' => $sender->getName(),'msg' => $string]);
   }
 
   public function EventPlayerJoin(PlayerJoinEvent $joinEvent)
@@ -102,23 +100,9 @@ class Twix extends PluginBase implements Listener
     if($this->hasUpdate AND $player->hasPermission('twix.update')) $this->getUpdateChecker()->showPlayerUpdate($player);
   }
 
-  public function sendPost(string $message,callable $then = null,array $fields = [],$id = null)
-  {
-    $fFields = ['status' => $message] + $fields;
-    $builder = $this->getBuilder();
-    $builder->setTokens($this->getTokens());
-    $builder->setMethod(self::REQUEST_POST);
-    $builder->setUrl(self::ENDPOINT_UPDATE);
-    $builder->setFields($fFields);
-    $builder->setId($id);
-    $builder->then($then);
-    $result = $builder->getResult();
-    $this->scheduleAsyncTask($result);
-  }
+  public function getTwixHelper(){return $this->twixHelper;}
 
   public function getBuilder() { return new TwixBuilder(); }
-
-  private function scheduleAsyncTask(AsyncTask $task) { $this->getServer()->getScheduler()->scheduleAsyncTask($task); }
 
   public function getTokens(): array { return $this->tokens; }
 

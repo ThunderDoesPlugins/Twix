@@ -18,7 +18,8 @@ class TwixBuilder
   //Optionals
   private $fields,$then,$id;
 
-  static public function get(){
+  static public function get()
+  {
     return new static();
   }
 
@@ -136,6 +137,7 @@ class TwixBuilder
     $url = $this->url;
     $method = $this->method;
     if(isset($this->fields)) $fields = $this->fields; else $fields = [];
+
     if(isset($this->then)) $then = $this->then; else $then = null;
     if(isset($this->id) AND $this->id !== null) $id = $this->id; else $id = [];
     $result = new TwixFetcher($token,$url,$method,$fields,$then,$id);

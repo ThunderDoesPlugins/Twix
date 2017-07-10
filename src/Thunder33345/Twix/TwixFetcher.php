@@ -5,8 +5,7 @@ namespace Thunder33345\Twix;
 
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
-use Thunder33345\Twix\Exception\TwixExecutionException;
-use Thunder33345\Twix\Exception\TwixRequestException;
+use Thunder33345\Twix\Exception\InvalidMethodException;
 
 class TwixFetcher extends AsyncTask
 {
@@ -46,8 +45,9 @@ class TwixFetcher extends AsyncTask
     $fields = unserialize($this->fields);
     $twitter = $this->getTwitter();
     if(!self::disabled) {
-      switch($requestMethod){
+      switch(strtolower($requestMethod)){
         case Twix::REQUEST_GET:
+          $fields = '?'.http_build_query($fields,'','&');
           $twitter = $twitter->setGetfield($fields)->buildOauth($url,"GET");
           break;
         case Twix::REQUEST_POST:
@@ -55,18 +55,19 @@ class TwixFetcher extends AsyncTask
           break;
         default:
           //How tf would this even happen anyways?
-          throw new \InvalidArgumentException('Invalid Argument: $method expecting Twix::REQUEST_GET OR Twix::REQUEST_POST');
+          throw InvalidMethodException::render($requestMethod);
       }
-      try{
-        //Pointless to catch and throw if i am doing nothing
-        $respond = $twitter->performRequest();
-        $http = $twitter->getHttpStatusCode();
-      }
-      catch(\Exception$exception){
-        //at least they know where that come from
-        //would be nice to be able to remedy it
-        throw TwixRequestException::render($exception);
-      }
+//      try{
+      //Pointless to catch and throw if i am doing nothing
+      $respond = $twitter->performRequest();
+      $http = $twitter->getHttpStatusCode();
+//      }
+//      catch(\Exception$exception){
+//        //at least they know where that come from
+//        //would be nice to be able to remedy it
+//
+//        throw TwixRequestException::render($exception);
+//      }
     } else {
       $respond = 'Not available(Inactive)';
       $http = 200;
@@ -84,12 +85,12 @@ class TwixFetcher extends AsyncTask
     $httpCode = $results['httpCode'];
     $id = unserialize($this->id);
     $then = $this->then;
-    try{
-      $then(new TwixResult($server,$respond,$httpCode,$id));
-    }
-    catch(\Exception$exception){
-      throw TwixExecutionException::render($exception);
-    }
+//    try{//todo better error handling as this stops debugging
+    $then(new TwixResult($server,$respond,$httpCode,$id));
+//    }
+//    catch(\Exception$exception){
+//      throw TwixExecutionException::render($exception);
+//    }
   }
 
   private function getTwitter() { return new TwitterAPIExchange(unserialize($this->tokens)); }

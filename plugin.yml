@@ -15,7 +15,7 @@ permissions:
     default: false
     description: ""
     children:
-      twix.use:
+      twix.post:
         default: op
       twix.update:
         default: op
