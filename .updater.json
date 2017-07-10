@@ -1,9 +1,9 @@
 {
   "pilot": {
-    "time": "1498155694",
-    "version": "0.1.0-PILOT1",
-    "info": "This is the first release, this shouldn't be showing up here",
-    "short_info": "First Release",
+    "time": "1499682965",
+    "version": "0.1.0-PILOT2",
+    "info": "API and commands changes, added more commands to get profile of yourself or others",
+    "short_info": "Added more commands to get profile of yourself or others",
     "download_url": "https://github.com/ThunderDoesPlugins/Twix"
   }
 }
