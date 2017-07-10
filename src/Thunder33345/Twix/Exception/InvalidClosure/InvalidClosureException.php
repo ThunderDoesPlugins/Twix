@@ -9,4 +9,4 @@ use Thunder33345\Twix\Exception\TwixExceptionInterface;
  * (Yes that's a lot)
  */
 
-class InvalidClosureException extends \InvalidArgumentException implements TwixExceptionInterface {}
+abstract class InvalidClosureException extends \InvalidArgumentException implements TwixExceptionInterface {}

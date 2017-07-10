@@ -1,6 +1,8 @@
 <?php
 /** Created By Thunder33345 **/
-
+/**
+ * STUB
+ */
 namespace Thunder33345\Twix\Commands;
 
 use pocketmine\command\CommandSender;

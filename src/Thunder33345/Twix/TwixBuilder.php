@@ -4,19 +4,26 @@
 namespace Thunder33345\Twix;
 
 use Thunder33345\Twix\Exception\IllegalIdException;
+use Thunder33345\Twix\Exception\InvalidClosure\IllegalStaticException;
 use Thunder33345\Twix\Exception\InvalidClosure\InvalidArgumentAcceptException;
 use Thunder33345\Twix\Exception\InvalidClosure\InvalidArgumentAcceptTypeException;
 use Thunder33345\Twix\Exception\InvalidClosure\InvalidArgumentCountException;
 use Thunder33345\Twix\Exception\InvalidMethodException;
 use Thunder33345\Twix\Exception\InvalidTokensException;
 use Thunder33345\Twix\Exception\MissingValueException;
+use Thunder33345\Twix\Objects\CompletionError;
+use Thunder33345\Twix\Objects\FetchError;
 
 class TwixBuilder
 {
   //Mandatory
   private $tokens,$url,$method;
+
   //Optionals
   private $fields,$then,$id;
+
+  //Errors
+  private $error,$fetchError;
 
   static public function get()
   {
@@ -90,28 +97,28 @@ class TwixBuilder
    * function (TwixResult $result) {/do something/}
    * the only variable that will be returned is TwixResult which will contain everything you need
    */
-  public function then($function)
+  public function then(\Closure $function)
   {
     $reflect = new \ReflectionFunction($function);
 
     $parameters = $reflect->getParameters();
 
     $static = $reflect->getStaticVariables();
-    if(count($static) > 0) throw InvalidArgumentCountException::render();
+    if(count($static) > 0) throw IllegalStaticException::render();
 
     if(count($parameters) !== 1) throw InvalidArgumentCountException::render();
 
     foreach($parameters as $parameter){
-      if($parameter->getType() === null) throw InvalidArgumentAcceptException::render();
-      if((string)$parameter->getType() !== TwixResult::class) throw InvalidArgumentAcceptTypeException::render((string)$parameter->getType());
-
+      if($parameter->getType() === null) throw InvalidArgumentAcceptException::render('TwixResult');
+      if((string)$parameter->getType() !== TwixResult::class) throw InvalidArgumentAcceptTypeException::render(TwixResult::class,(string)$parameter->getType());
     }
+
     $this->then = $function;
     return $this;
   }
 
   /*
-   * something serialize-able, only useful if you have a then, used for identification proposes
+   * something serialize-able, only useful if you have a then, useful for identification proposes
    */
   public function setId($id)
   {
@@ -122,6 +129,57 @@ class TwixBuilder
       throw IllegalIdException::render($exception);
     }
     $this->id = $id;
+    return $this;
+  }
+
+  /**
+   * Called when there's a exception thrown onCompletion
+   * @param \Closure $error
+   * @return $this
+   */
+
+  public function error(\Closure $error)
+  {
+    $reflect = new \ReflectionFunction($error);
+
+    $static = $reflect->getStaticVariables();
+    $parameters = $reflect->getParameters();
+
+    if(count($static) > 0) throw IllegalStaticException::render();
+
+    if(count($parameters) !== 1) throw InvalidArgumentCountException::render();
+
+    foreach($parameters as $parameter){
+      if($parameter->getType() === null) throw InvalidArgumentAcceptException::render('CompletionError');
+      if((string)$parameter->getType() !== CompletionError::class) throw InvalidArgumentAcceptTypeException::render('CompletionError',(string)$parameter->getType());
+    }
+
+    $this->error = $error;
+    return $this;
+  }
+
+  /**
+   * Called when there's a exception thrown onRun
+   * @param \Closure $error
+   * @return $this
+   */
+  public function fetchError(\Closure $error)
+  {
+    $reflect = new \ReflectionFunction($error);
+
+    $static = $reflect->getStaticVariables();
+    $parameters = $reflect->getParameters();
+
+    if(count($static) > 0) throw IllegalStaticException::render();
+
+    if(count($parameters) !== 1) throw InvalidArgumentCountException::render();
+
+    foreach($parameters as $parameter){
+      if($parameter->getType() === null) throw InvalidArgumentAcceptException::render('FetchError');
+      if((string)$parameter->getType() !== FetchError::class) throw InvalidArgumentAcceptTypeException::render('FetchError',(string)$parameter->getType());
+    }
+
+    $this->fetchError = $error;
     return $this;
   }
 
@@ -140,7 +198,10 @@ class TwixBuilder
 
     if(isset($this->then)) $then = $this->then; else $then = null;
     if(isset($this->id) AND $this->id !== null) $id = $this->id; else $id = [];
-    $result = new TwixFetcher($token,$url,$method,$fields,$then,$id);
+    if(isset($this->error)) $error = $this->error; else $error = null;
+    if(isset($this->fetchError)) $fetchError = $this->fetchError; else $fetchError = null;
+
+    $result = new TwixFetcher($token,$url,$method,$fields,$then,$id,$error,$fetchError);
     return $result;
   }
 

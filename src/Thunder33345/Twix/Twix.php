@@ -52,6 +52,7 @@ class Twix extends PluginBase implements Listener
   {
     @mkdir($this->getDataFolder());
     $this->saveDefaultConfig();
+
     $this->saveResource('config_secret.yml');
     if(file_exists($this->getDataFolder().'/config_secret.yml')) {// used for git
       $this->getLogger()->warning('DEV MODE ACTIVE! - Attempting to overwrite default config with secret file...');

@@ -6,6 +6,6 @@ use Thunder33345\Twix\Exception\TwixExceptionInterface;
 
 class InvalidArgumentCountException extends InvalidClosureException implements TwixExceptionInterface{
   static public function render(){
-    return new static('Function Can Only Use TwixResult');
+    return new static('Function Can Only Have One Parameter');
   }
 }
