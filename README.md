@@ -4,33 +4,43 @@
 <!-- TODO rework Readme.md and SEO tags --!>
 <!--
   Title: Twix
-  Description: A Twitter plugin with powerfull API
+  Description: A Twitter plugin with powerful API
   Author: Thunder33345
   -->
 <meta name='keywords' content='twitter, pocketmine, plugin, pmmp, mcpe'>
-<meta name='description' content='A Twitter plugin with powerfull API'>
+<meta name='description' content='A Twitter plugin with powerful API'>
 
 ### Tweet at the comfort of your server!
 
-# TODO
+README MD still need work
 
 ## Commands:
-/twix alias /tw (message)
+Command (args) (shortcut)
+
+/TwixGet \<User> (twg)
+
+/TwixPost \<message> (twp)
+
+/TwixVerify (twv)
 
 ## API:
-Check out [How the plugin uses it's own API](https://github.com/ThunderDoesPlugins/Twix/blob/master/src/Thunder33345/Twix/Twix.php#L105-L117)
+Check out [Prebuilt API](https://github.com/ThunderDoesPlugins/Twix/blob/master/src/Thunder33345/Twix/TwixHelper.php) for common usage 
 
 The main way to use this plugin is to interact with [TwixBuilder](https://github.com/ThunderDoesPlugins/Twix/blob/master/src/Thunder33345/Twix/TwixBuilder.php), tokens URL method are mandatory, most of them are self explanatory
+
+Or
 
 There's a few special ones like setID() and then()
 
 ### Then:
 
+DISCLAIMER: This has nothing to do with promises, and DOES NOT function like promises
+
 Then() is a special function invoked AFTER your request(will be done in async) has been executed (this will be done in main thread) (this is not mandatory)
 
 Your function is expected to be ```$function = function(TwixResult $result) {}``` only one and no more
 
-DO NOT PASS callables like [$this,'callback'] since it's done in async PHP wont like it, your function is expected to type hint "TwixResult" which will provide a few useful things for you,
+DO NOT PASS callable like [$this,'callback'] since it's done in async PHP wont like it, your function is expected to type hint "TwixResult" which will provide a few useful things for you,
 
 You can see [TwixResult](https://github.com/ThunderDoesPlugins/Twix/blob/master/src/Thunder33345/Twix/TwixResult.php) will provide server, respond and HTTP respond(currently there's not much error handing against things like not connected etc), if you dont fancy working in functions, you can callback to your plugin but there's no diffrences in doing that
 
@@ -44,4 +54,4 @@ Please note that DO NOT try to put something non serializable into it(example Se
 
 ## getResult:
 
-This throws a MissingValueException if a mandatory value is not given, returns TwixFetcher if everything is fulfilled, please note that YOU are responsible to schedule the async task
+This throws a MissingValueException if a mandatory value is not given, returns TwixFetcher if everything is fulfilled, **please note that YOU are responsible to schedule the async task**
